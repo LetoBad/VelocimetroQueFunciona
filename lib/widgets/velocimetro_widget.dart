@@ -15,41 +15,7 @@ class VelocimetroWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 250,
-      width: 250,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          CustomPaint(
-            size: const Size(240, 240),
-            painter: PintorVelocimetro(velocidadeMax: velocidadeMax),
-          ),
-          Positioned(
-            bottom: 30,
-            child: Column(
-              children: [
-                Text(
-                  velocidade.toStringAsFixed(1),
-                  style: GoogleFonts.orbitron(
-                    fontSize: 46,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.blue.shade600, // Alterado para azul
-                  ),
-                ),
-                Text(
-                  'km/h',
-                  style: GoogleFonts.orbitron(
-                    fontSize: 16,
-                    color: Colors.white70,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
+    return SizedBox();
   }
 
   double _obterAnguloDaVelocidade(double velocidade, double velocidadeMax) {

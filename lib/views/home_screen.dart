@@ -26,7 +26,7 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: Colors.blue.shade50,
       appBar: AppBar(
         title: const Text(
-          'Velocímetro',
+          'Speidometer',
           style: TextStyle(color: Colors.black),
         ),
         backgroundColor: Colors.blue.shade50,
@@ -87,7 +87,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 const SizedBox(height: 30),
                 _buildCartoesInformacoes(viagemViewModel),
                 const SizedBox(height: 20),
-                _buildTempoTotalViagem(viagemViewModel),
               ],
             ),
           ),
@@ -100,35 +99,35 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildCartoesInformacoes(ViagemViewModel viagemViewModel) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24.0),
-      child: Row(
+      child: Column(
         children: [
-          _infoCard(
+          // Cartão de Distância
+          _buildCard(
+            Icons.straighten,
             'Distância',
             '${viagemViewModel.distancia.toStringAsFixed(2)} km',
-            Icons.straighten,
             Colors.green.shade400,
+            context,
           ),
-          const SizedBox(width: 20),
-          _infoCard(
+          const SizedBox(height: 20),
+          // Cartão de Velocidade Média
+          _buildCard(
+            Icons.speed,
             'Vel. Média',
             '${viagemViewModel.velocidade.toStringAsFixed(1)} km/h',
-            Icons.speed,
             Colors.orange.shade400,
+            context,
+          ),
+          const SizedBox(height: 20),
+          // Cartão de Tempo
+          _buildCard(
+            Icons.timer,
+            'Tempo',
+            _formatarDuracao(viagemViewModel.duracaoViagem),
+            Colors.blue.shade400,
+            context,
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildTempoTotalViagem(ViagemViewModel viagemViewModel) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24.0),
-      child: _infoCard(
-        'Tempo',
-        _formatarDuracao(viagemViewModel.duracaoViagem),
-        Icons.timer,
-        Colors.blue.shade400,
-        fullWidth: true,
       ),
     );
   }
@@ -170,45 +169,61 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _infoCard(
-    String title,
-    String value,
-    IconData icon,
-    Color color, {
-    bool fullWidth = false,
-  }) {
-    return Expanded(
-      flex: fullWidth ? 2 : 1,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.black,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Column(
+  // Novo método para criar o card estilizado
+  Widget _buildCard(IconData icon, String title, String value, Color color,
+      BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+            // Ícone
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                icon,
+                color: color,
+                size: 30,
+              ),
+            ),
+            // Texto de Título e Valor
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(icon, color: color, size: 20),
-                const SizedBox(width: 8),
                 Text(
                   title,
                   style: GoogleFonts.poppins(
-                    color: Color.fromARGB(179, 255, 255, 255),
-                    fontSize: 14,
+                    fontSize: 16,
+                    color: Colors.black87,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  value,
+                  style: GoogleFonts.orbitron(
+                    fontSize: 26,
+                    fontWeight: FontWeight.bold,
+                    color: color,
                   ),
                 ),
               ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              value,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
             ),
           ],
         ),
