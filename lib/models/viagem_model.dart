@@ -15,7 +15,7 @@ class ViagemModel {
 
   // Método para copiar o modelo e atualizar apenas os campos desejados
   ViagemModel copiarCom({
-    double? velocidade, 
+    double? velocidade,
     double? distancia,
     double? velocidadeMedia,
     Duration? duracaoViagem,

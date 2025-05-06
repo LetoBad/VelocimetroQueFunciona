@@ -23,16 +23,17 @@ class ViagemViewModel with ChangeNotifier {
   double get velocidadeMedia => _dadosViagem.velocidadeMedia;
   Duration get duracaoViagem => _dadosViagem.duracaoViagem;
 
-  /// Inicializa o ViewModel verificando a permissão de localização
+  // Inicializa o ViewModel verificando a permissão de localização
   Future<void> init() async {
     await _verificarPermissaoLocalizacao();
   }
 
-  /// Verifica e solicita permissões de localização
+  // Verifica e solicita permissões de localização
   Future<void> _verificarPermissaoLocalizacao() async {
     final servicoHabilitado = await Geolocator.isLocationServiceEnabled();
     if (!servicoHabilitado) {
-      _alterarPermissaoLocalizacao(false);
+      _permissaoLocalizacao = false;
+      notifyListeners();
       return;
     }
 
@@ -40,31 +41,28 @@ class ViagemViewModel with ChangeNotifier {
     if (statusPermissao == LocationPermission.denied) {
       statusPermissao = await Geolocator.requestPermission();
       if (statusPermissao == LocationPermission.denied) {
-        _alterarPermissaoLocalizacao(false);
+        _permissaoLocalizacao = false;
+        notifyListeners();
         return;
       }
     }
 
     if (statusPermissao == LocationPermission.deniedForever) {
-      _alterarPermissaoLocalizacao(false);
+      _permissaoLocalizacao = false;
+      notifyListeners();
       return;
     }
 
-    _alterarPermissaoLocalizacao(true);
-  }
-
-  /// Atualiza o status da permissão de localização e notifica
-  void _alterarPermissaoLocalizacao(bool status) {
-    _permissaoLocalizacao = status;
+    _permissaoLocalizacao = true;
     notifyListeners();
   }
 
-  /// Solicita manualmente a permissão de localização
+  // Solicita manualmente a permissão de localização
   Future<void> solicitarPermissaoLocalizacao() async {
     await _verificarPermissaoLocalizacao();
   }
 
-  /// Inicia o rastreamento da viagem
+  // Inicia o rastreamento da viagem
   void iniciarViagem() {
     if (!_permissaoLocalizacao || _rastreamentoAtivo) return;
 
@@ -79,12 +77,14 @@ class ViagemViewModel with ChangeNotifier {
 
     _assinaturaStreamPosicao = Geolocator.getPositionStream(
       locationSettings: configuracoesLocalizacao,
-    ).listen(_atualizarDadosViagem);
+    ).listen((posicao) {
+      _atualizarDadosViagem(posicao);
+    });
 
     notifyListeners();
   }
 
-  /// Pausa o rastreamento da viagem
+  // Pausa o rastreamento da viagem
   void pausarRastreamento() {
     if (!_rastreamentoAtivo) return;
 
@@ -93,7 +93,7 @@ class ViagemViewModel with ChangeNotifier {
     notifyListeners();
   }
 
-  /// Retoma o rastreamento da viagem
+  // Retoma o rastreamento da viagem
   void retomarRastreamento() {
     if (_rastreamentoAtivo) return;
 
@@ -103,7 +103,7 @@ class ViagemViewModel with ChangeNotifier {
     notifyListeners();
   }
 
-  /// Reseta todos os dados da viagem
+  // Reseta todos os dados da viagem
   void resetarViagem() {
     _dadosViagem = ViagemModel();
     _ultimaPosicao = null;
@@ -112,25 +112,11 @@ class ViagemViewModel with ChangeNotifier {
     notifyListeners();
   }
 
-  /// Atualiza os dados da viagem com base na nova posição
+  // Atualiza os dados da viagem com base na nova posição
   void _atualizarDadosViagem(Position posicaoAtual) {
     final agora = DateTime.now();
     final velocidadeKmh = posicaoAtual.speed * 3.6;
 
-    _calcularDistancia(posicaoAtual);
-    _calcularDuracaoViagem(agora);
-    _calcularVelocidadeMedia();
-
-    _dadosViagem = _dadosViagem.copiarCom(velocidade: velocidadeKmh);
-
-    _ultimaPosicao = posicaoAtual;
-    _ultimoTempoAtualizado = agora;
-
-    notifyListeners();
-  }
-
-  /// Calcula a distância percorrida
-  void _calcularDistancia(Position posicaoAtual) {
     if (_ultimaPosicao != null) {
       final distanciaMetros = Geolocator.distanceBetween(
         _ultimaPosicao!.latitude,
@@ -143,29 +129,29 @@ class ViagemViewModel with ChangeNotifier {
         distancia: _dadosViagem.distancia + (distanciaMetros / 1000),
       );
     }
-  }
 
-  /// Calcula a duração da viagem
-  void _calcularDuracaoViagem(DateTime agora) {
     if (_tempoInicial != null) {
       final duracao = agora.difference(_tempoInicial!);
       _dadosViagem = _dadosViagem.copiarCom(duracaoViagem: duracao);
     }
-  }
 
-  /// Calcula a velocidade média da viagem
-  void _calcularVelocidadeMedia() {
     if (_dadosViagem.duracaoViagem.inSeconds > 0) {
       final velocidadeMediaCalculada =
           (_dadosViagem.distancia / _dadosViagem.duracaoViagem.inSeconds) *
               3600;
-      _dadosViagem = _dadosViagem.copiarCom(
-        velocidadeMedia: velocidadeMediaCalculada,
-      );
+      _dadosViagem =
+          _dadosViagem.copiarCom(velocidadeMedia: velocidadeMediaCalculada);
     }
+
+    _dadosViagem = _dadosViagem.copiarCom(velocidade: velocidadeKmh);
+
+    _ultimaPosicao = posicaoAtual;
+    _ultimoTempoAtualizado = agora;
+
+    notifyListeners();
   }
 
-  /// Cancela a assinatura ao descartar o ViewModel
+  // Cancela a assinatura ao descartar o ViewModel
   @override
   void dispose() {
     _assinaturaStreamPosicao?.cancel();

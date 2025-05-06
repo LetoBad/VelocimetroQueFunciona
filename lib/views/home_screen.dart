@@ -1,10 +1,9 @@
-// Importação dos pacotes necessários
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:velocimetro/viewmodels/viagem_viewmodel.dart';
 import 'package:velocimetro/widgets/velocimetro_widget.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-// Tela principal do app (Home)
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -16,7 +15,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-
     Future.delayed(Duration.zero, () {
       Provider.of<ViagemViewModel>(context, listen: false).init();
     });
@@ -25,13 +23,13 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.blue.shade50,
       appBar: AppBar(
         title: const Text(
           'Velocímetro',
           style: TextStyle(color: Colors.black),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.blue.shade50,
         elevation: 0,
         centerTitle: true,
       ),
@@ -40,7 +38,6 @@ class _HomeScreenState extends State<HomeScreen> {
           if (!viagemViewModel.permissaoLocalizacao) {
             return _buildPermissaoSolicitacao(viagemViewModel);
           }
-
           return _buildInformacoesViagem(viagemViewModel);
         },
       ),
@@ -65,6 +62,8 @@ class _HomeScreenState extends State<HomeScreen> {
               backgroundColor: Colors.blue,
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30)),
             ),
             child: const Text('Solicitar Permissão'),
           ),
@@ -171,7 +170,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // Componente reutilizável para mostrar dados da viagem (distância, tempo, etc.)
   Widget _infoCard(
     String title,
     String value,
@@ -196,7 +194,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 const SizedBox(width: 8),
                 Text(
                   title,
-                  style: const TextStyle(
+                  style: GoogleFonts.poppins(
                     color: Color.fromARGB(179, 255, 255, 255),
                     fontSize: 14,
                   ),
@@ -225,7 +223,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // Função utilitária para formatar o tempo da viagem como hh:mm:ss
   String _formatarDuracao(Duration duration) {
     String doisDigitos(int n) => n.toString().padLeft(2, '0');
     return '${doisDigitos(duration.inHours)}:${doisDigitos(duration.inMinutes.remainder(60))}:${doisDigitos(duration.inSeconds.remainder(60))}';
